@@ -1,4 +1,4 @@
-from config import *
+from config import PORT_SENSITIVE, SIZE_BYTES_FILE
 
 
 def list_ip_source(data_list):
@@ -21,3 +21,8 @@ def port_sensitive_list(data_list):
 def is_sensitive(data):
     """בודקת האם אלה פורטים רגישים"""
     return data in PORT_SENSITIVE.values()
+
+
+def list_of_size(data_list):
+    """החזרת רשימה של הגדלים של הקובץ שיותר מ- 5000"""
+    return (data[-1] for data in data_list if int(data[-1]) > SIZE_BYTES_FILE)
