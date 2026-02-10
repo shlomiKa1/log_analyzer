@@ -42,3 +42,9 @@ def dict_ip_source(data_list):
     """פונקציה שמחזירה מילון של כתובת IP שולח עם המספר הפניה אליו"""
     val = [data[MAP_ROWS["IP_SOURCE"]] for data in data_list]
     return {key: val.count(key) for key in set(val)}
+
+
+# פונקציה למיפוי פורט לפרוטוקול
+def dict_num_port_name_protocol(data_list):
+    """פונרציה שמחזירה מילון של ההמספרי פורט עם השם שלהם"""
+    return {int(data[MAP_ROWS["PORT"]]): data[MAP_ROWS["PROTOCOL"]] for data in data_list}
