@@ -1,4 +1,4 @@
-from config import KB_FORMAT, PORT_SENSITIVE
+from config import KB_FORMAT, PORT_SENSITIVE, MIN_ONE_SUSPICION
 from datetime import datetime
 from analyzer import *
 
@@ -45,3 +45,10 @@ def dict_of_checks_suspicion():
 def list_line_checks(line, dict_check):
     """פונקציה שמקבלת שורה ומילון של הבדיקות שעשינו, ומחזירה רשימהשל כל החשודות שיש לשורה הזאת"""
     return list(filter(lambda checks_name: dict_check[checks_name](line), dict_check))
+
+
+def checks_of_all_lines(data_list):
+    """פונקציה המקבלת רשימה של שורות ומחזירה רשימהשל כל החשודות שיש לכל שורה"""
+    dict_checks = dict_of_checks_suspicion()
+    map_suspicion = map(lambda data: list_line_checks(data, dict_checks), data_list)
+    return list(filter(lambda min_suspicion: len(min_suspicion) >= MIN_ONE_SUSPICION, map_suspicion))

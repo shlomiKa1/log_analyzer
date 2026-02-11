@@ -1,4 +1,4 @@
-from config import MAP_ROWS, NIGHT_ACTIVITY, MIN_SUSPICION
+from config import MAP_ROWS, NIGHT_ACTIVITY, MIN_THREE_SUSPICION
 from checks import is_external, is_sensitive, is_largest_size
 
 
@@ -39,4 +39,4 @@ def is_night_active(date_str):
 
 def more_of_tow_suspicion(data_dict):
     """פונקציה שמחזירה מילון של כל הכתובות שיש להם יותר משתי חשודות"""
-    return {item: val for item, val in dict_ip_suspicion(data_dict).items() if len(val) >= MIN_SUSPICION}
+    return {item: val for item, val in dict_ip_suspicion(data_dict).items() if len(val) >= MIN_THREE_SUSPICION}
