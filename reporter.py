@@ -1,5 +1,5 @@
-from config import KB_FORMAT, MAP_ROWS, PORT_SENSITIVE, NIGHT_ACTIVITY
-from datetime import datetime, time
+from config import KB_FORMAT, PORT_SENSITIVE
+from datetime import datetime
 from analyzer import *
 
 def format_time(date_str):
@@ -41,3 +41,7 @@ def dict_of_checks_suspicion():
             "LARGE_PACKET": lambda size: is_largest_size(size[MAP_ROWS["SIZE"]]),
             "NIGHT_ACTIVITY": lambda night: is_night_active_format(night[MAP_ROWS["DATE"]])
             }
+
+def list_line_checks(line, dict_check):
+    """פונקציה שמקבלת שורה ומילון של הבדיקות שעשינו, ומחזירה רשימהשל כל החשודות שיש לשורה הזאת"""
+    return list(filter(lambda checks_name: dict_check[checks_name](line), dict_check))
