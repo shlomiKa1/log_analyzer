@@ -9,3 +9,4 @@ MAP_ROWS = {"DATE": 0, "IP_SOURCE": 1, "IP_DEST": 2, "PORT": 3, "PROTOCOL": 4, "
 NIGHT_ACTIVITY = ("00:00", "06:00") # שעות לילה
 MIN_SUSPICION = 3 # מינימום חשודות
 NOT_EXTERNAL_IP = ("10", "192.168") # כתובות חוקיים
+KB_FORMAT = 1024 # המרת של בייטים לקילובייט
