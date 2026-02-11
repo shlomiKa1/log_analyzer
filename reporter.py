@@ -1,5 +1,6 @@
 from config import KB_FORMAT, MAP_ROWS, PORT_SENSITIVE, NIGHT_ACTIVITY
 from datetime import datetime, time
+from analyzer import *
 
 def format_time(date_str):
     """פונקציה שמקבלת רשימה של timestamps ומחזירה רשימה של השעות"""
@@ -31,3 +32,12 @@ def is_night_active_format(date_str):
         return start <= current <= end
     # אם הטווח מתחיל לפני חצות ונגמר אחרי חצות
     return start <= current or end >= current
+
+
+def dict_of_checks_suspicion():
+    """פונקציה המחזירה מילון שבודק איזה שורות יש להם דברים חשודים"""
+    return {"EXTERNAL_IP": lambda ip: is_external(ip[MAP_ROWS["IP_SOURCE"]]),
+            "PORT_SENSITIVE": lambda port: is_sensitive(port[MAP_ROWS["PORT"]]),
+            "LARGE_PACKET": lambda size: is_largest_size(size[MAP_ROWS["SIZE"]]),
+            "NIGHT_ACTIVITY": lambda night: is_night_active_format(night[MAP_ROWS["DATE"]])
+            }
