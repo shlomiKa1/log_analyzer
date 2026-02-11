@@ -1,7 +1,4 @@
-from operator import countOf
-from pstats import count_calls
-
-from config import PORT_SENSITIVE, SIZE_BYTES_FILE, MAP_ROWS
+from config import PORT_SENSITIVE, SIZE_BYTES_FILE, MAP_ROWS, NIGHT_ACTIVITY
 
 
 # פונקציה לרשימת IP source
@@ -46,5 +43,28 @@ def dict_ip_source(data_list):
 
 # פונקציה למיפוי פורט לפרוטוקול
 def dict_num_port_name_protocol(data_list):
-    """פונרציה שמחזירה מילון של ההמספרי פורט עם השם שלהם"""
+    """פונקציה שמחזירה מילון של ההמספרי פורט עם השם שלהם"""
     return {int(data[MAP_ROWS["PORT"]]): data[MAP_ROWS["PROTOCOL"]] for data in data_list}
+
+
+def night_active(data_list):
+    """פונקציה שמחזירה מילון של כתובות עם רשימה החששות שיש
+    יכול להיות שיהיה תיקונים לפונקציה """
+    all_ip = (data[MAP_ROWS["IP_SOURCE"]] for data in data_list)
+    return {ip_key:
+                (list(set(tags
+                    for data in data_list if data[MAP_ROWS["IP_SOURCE"]] == ip_key
+                    for condition, tags in [(is_external(data[MAP_ROWS["IP_SOURCE"]]), "EXTERNAL_IP"),
+                                      (is_sensitive(data[MAP_ROWS["PORT"]]), "PORT_SENSITIVE"),
+                                      (int(data[MAP_ROWS["SIZE"]]) > SIZE_BYTES_FILE, "LARGE_PACKET"),
+                                      (is_night_active(data[MAP_ROWS["DATE"]]), "NIGHT_ACTIVITY")]
+                          if condition
+                          )))
+            for ip_key in all_ip}
+
+# פונקצית עזר לטיפול שעות פעילות
+def is_night_active(date_str):
+    """בדיקה האם היה פעילות בשעת לילה, בהנחה שקיבלנו שעות ב STR"""
+    hour_str = date_str[11:16]
+    start, end = NIGHT_ACTIVITY
+    return start <= hour_str <= end
