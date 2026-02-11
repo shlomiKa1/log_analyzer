@@ -3,4 +3,4 @@ network_traffic.csv
 network_traffic.log
 test.py
 __pycache__
-
+.idea
