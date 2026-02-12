@@ -54,7 +54,12 @@ def checks_of_all_lines(data_list):
     return list(filter(lambda min_suspicion: len(min_suspicion) >= MIN_ONE_SUSPICION, map_suspicion))
 
 # stage 4
-def checks_suspicion_yield(line_file_yield):
+def checks_suspicion_yield(generator):
     """פונקציה המקבלת שורה ועוברת ע"י yield על כולם ומחזירה את כל השורות שיש להם לפחות חשודה אחת"""
     dict_check = dict_of_checks_suspicion()
-    return list(line for line in line_file_yield if list_line_checks(line, dict_check))
+    return list(line for line in generator if len(list_line_checks(line, dict_check)) >= MIN_ONE_SUSPICION)
+
+def tuple_of_suspicion_details(generator):
+    """פונקציה המקבלת generator ומחזירה רשימה של טאפלים שבראשון יש רשימה של הפרטים של השורה ובשני יש את רשימה של החשודות"""
+    dict_check = dict_of_checks_suspicion()
+    return list((line, list_line_checks(line, dict_check)) for line in checks_suspicion_yield(generator))

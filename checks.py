@@ -11,7 +11,7 @@ def list_ip_source(data_list):
 # פונקצית עזר
 def is_external(data) -> bool:
     """בודקת האם זה כתובות חיצוניות"""
-    return data[0:2:] != NOT_EXTERNAL_IP[0] and data[0:7:] != NOT_EXTERNAL_IP[1]
+    return data[0:3:] != NOT_EXTERNAL_IP[0] and data[0:7:] != NOT_EXTERNAL_IP[1]
 
 # פונקציה לרישמת פורטים רגישים
 def port_sensitive_list(data_list):
