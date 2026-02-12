@@ -63,3 +63,7 @@ def tuple_of_suspicion_details(generator):
     """פונקציה המקבלת generator ומחזירה רשימה של טאפלים שבראשון יש רשימה של הפרטים של השורה ובשני יש את רשימה של החשודות"""
     dict_check = dict_of_checks_suspicion()
     return list((line, list_line_checks(line, dict_check)) for line in checks_suspicion_yield(generator))
+
+def count_of_suspicion_lines(generator):
+    """פונקציה שמקבלת generator ומחזירה את הכמות של השורות החשדות"""
+    return len(checks_suspicion_yield(generator))
