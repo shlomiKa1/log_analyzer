@@ -1,6 +1,8 @@
 from config import KB_FORMAT, PORT_SENSITIVE, MIN_ONE_SUSPICION
 from datetime import datetime
 from analyzer import *
+from reader import load_csv_on_yield
+
 
 def format_time(date_str):
     """פונקציה שמקבלת רשימה של timestamps ומחזירה רשימה של השעות"""
@@ -57,13 +59,22 @@ def checks_of_all_lines(data_list):
 def checks_suspicion_yield(generator):
     """פונקציה המקבלת שורה ועוברת ע"י yield על כולם ומחזירה את כל השורות שיש להם לפחות חשודה אחת"""
     dict_check = dict_of_checks_suspicion()
-    return list(line for line in generator if len(list_line_checks(line, dict_check)) >= MIN_ONE_SUSPICION)
+    return (line for line in generator if len(list_line_checks(line, dict_check)) >= MIN_ONE_SUSPICION)
 
 def tuple_of_suspicion_details(generator):
     """פונקציה המקבלת generator ומחזירה רשימה של טאפלים שבראשון יש רשימה של הפרטים של השורה ובשני יש את רשימה של החשודות"""
     dict_check = dict_of_checks_suspicion()
-    return list((line, list_line_checks(line, dict_check)) for line in checks_suspicion_yield(generator))
+    return ((line, list_line_checks(line, dict_check)) for line in checks_suspicion_yield(generator))
 
 def count_of_suspicion_lines(generator):
     """פונקציה שמקבלת generator ומחזירה את הכמות של השורות החשדות"""
-    return len(checks_suspicion_yield(generator))
+    return sum(1 for l in generator)
+
+def union_all_generator():
+    """פונקציה לאיחוד כל ה generator והדפסה כמה שורות חשודות יש"""
+    lines = load_csv_on_yield("network_traffic.csv")
+    suspicious = checks_suspicion_yield(lines)
+    detailed = tuple_of_suspicion_details(suspicious)
+
+    count = count_of_suspicion_lines(detailed)
+    print(f"Total of sus {count}")
