@@ -52,3 +52,9 @@ def checks_of_all_lines(data_list):
     dict_checks = dict_of_checks_suspicion()
     map_suspicion = map(lambda data: list_line_checks(data, dict_checks), data_list)
     return list(filter(lambda min_suspicion: len(min_suspicion) >= MIN_ONE_SUSPICION, map_suspicion))
+
+# stage 4
+def checks_suspicion_yield(line_file_yield):
+    """פונקציה המקבלת שורה ועוברת ע"י yield על כולם ומחזירה את כל השורות שיש להם לפחות חשודה אחת"""
+    dict_check = dict_of_checks_suspicion()
+    return list(line for line in line_file_yield if list_line_checks(line, dict_check))
