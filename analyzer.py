@@ -62,7 +62,7 @@ def list_bytes_to_kb(size_str):
 
 
 def list_of_sensitive_port(data_list):
-    """פונקציה שמקבלת רשימה של רשימות ומחזירה רשימה של רשימותץ של כל ה PORT הרגישים"""
+    """פונקציה שמקבלת רשימה של רשימות ומחזירה רשימה של רשימות של כל ה PORT הרגישים"""
     return list(filter(lambda port: port[MAP_ROWS["PORT"]] in PORT_SENSITIVE.values(), data_list))
 
 
@@ -102,7 +102,7 @@ def list_line_checks(line, dict_check):
 
 
 def checks_of_all_lines(data_list):
-    """פונקציה המקבלת רשימה של שורות ומחזירה רשימהשל כל החשודות שיש לכל שורה"""
+    """פונקציה המקבלת רשימה של שורות ומחזירה רשימה של כל החשודות שיש לכל שורה"""
     dict_checks = dict_of_checks_suspicion()
     map_suspicion = map(lambda data: list_line_checks(data, dict_checks), data_list)
     return list(filter(lambda min_suspicion: len(min_suspicion) >= MIN_ONE_SUSPICION, map_suspicion))
