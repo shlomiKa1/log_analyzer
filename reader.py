@@ -22,3 +22,14 @@ def load_csv_on_yield(filename):
     except FileNotFoundError as e:
         print(e)
         return None
+
+
+def save_report(report:str, filepath):
+    """פונקציה המקבלת דוח נתונים ושם של קובץ ושומרת את הנתונים לתוך הקובץ הנתון"""
+    try:
+        with open(filepath, 'w', encoding='utf-8') as aFile:
+            for line in report.strip():
+                 aFile.write(line)
+    except FileNotFoundError as e:
+        print(e)
+        return None
