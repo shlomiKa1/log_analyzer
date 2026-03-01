@@ -12,6 +12,8 @@ NOT_EXTERNAL_IP = ("10.", "192.168") # כתובות חוקיים
 KB_FORMAT = 1024 # המרת של בייטים לקילובייט
 MIN_ONE_SUSPICION = 1
 
+ACCESS_FREQUENT = 10 # הוספת חשוד של כמות פניות
+
 # globals
 total_lines = 0
 total_suspicion_lines = 0
