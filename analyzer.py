@@ -1,3 +1,5 @@
+from collections import Counter
+
 from checks import is_external, is_sensitive, is_largest_size
 from config import (
     MAP_ROWS,
@@ -5,7 +7,8 @@ from config import (
     MIN_THREE_SUSPICION,
     KB_FORMAT,
     PORT_SENSITIVE,
-    MIN_ONE_SUSPICION
+    MIN_ONE_SUSPICION,
+    ACCESS_FREQUENT
 )
 from datetime import datetime
 from reader import load_csv_on_yield
@@ -27,17 +30,16 @@ def dict_num_port_name_protocol(data_list):
 def dict_ip_suspicion(data_list):
     """פונקציה שמחזירה מילון של כתובות עם רשימה החשודות שיש
     יכול להיות שיהיה תיקונים לפונקציה """
-    all_ip = (data[MAP_ROWS["IP_SOURCE"]] for data in data_list)
+    checks = dict_of_checks_suspicion(data_list)
     return {ip_key:
-                (list(set(tags
-                    for data in data_list if data[MAP_ROWS["IP_SOURCE"]] == ip_key
-                    for condition, tags in [(is_external(data[MAP_ROWS["IP_SOURCE"]]), "EXTERNAL_IP"),
-                                      (is_sensitive(data[MAP_ROWS["PORT"]]), "PORT_SENSITIVE"),
-                                      (is_largest_size(data[MAP_ROWS["SIZE"]]), "LARGE_PACKET"),
-                                      (is_night_active(data[MAP_ROWS["DATE"]]), "NIGHT_ACTIVITY")]
-                          if condition
-                          )))
-            for ip_key in all_ip}
+                list(set(tag
+                          for data in data_list
+                          if data[MAP_ROWS["IP_SOURCE"]] == ip_key # אותו IP
+                          for tag, func in checks.items() # עוברים על כל שורה ושורה ובקדקים את סוגי החשודות
+                          if func(data) # יש חשודה אחד
+                          ))
+            for ip_key in set(data[MAP_ROWS["IP_SOURCE"]] for data in data_list)
+            }
 
 # פונקצית עזר לטיפול שעות פעילות
 def is_night_active(date_str):
@@ -87,12 +89,14 @@ def is_night_active_format(date_str):
     return start <= current or end >= current
 
 
-def dict_of_checks_suspicion() -> dict[str, any]:
+def dict_of_checks_suspicion(data_list) -> dict[str, any]:
     """פונקציה המחזירה מילון שבודק איזה שורות יש להם דברים חשודים"""
+    frequent_ips = add_suspicion(data_list)
     return {"EXTERNAL_IP": lambda ip: is_external(ip[MAP_ROWS["IP_SOURCE"]]),
             "PORT_SENSITIVE": lambda port: is_sensitive(port[MAP_ROWS["PORT"]]),
             "LARGE_PACKET": lambda size: is_largest_size(size[MAP_ROWS["SIZE"]]),
-            "NIGHT_ACTIVITY": lambda night: is_night_active_format(night[MAP_ROWS["DATE"]])
+            "NIGHT_ACTIVITY": lambda night: is_night_active_format(night[MAP_ROWS["DATE"]]),
+            "ACCESS_FREQUENT": lambda frequent: frequent[MAP_ROWS["IP_SOURCE"]] in frequent_ips
             }
 
 
@@ -103,7 +107,7 @@ def list_line_checks(line, dict_check):
 
 def checks_of_all_lines(data_list):
     """פונקציה המקבלת רשימה של שורות ומחזירה רשימה של כל החשודות שיש לכל שורה"""
-    dict_checks = dict_of_checks_suspicion()
+    dict_checks = dict_of_checks_suspicion(data_list)
     map_suspicion = map(lambda data: list_line_checks(data, dict_checks), data_list)
     return list(filter(lambda min_suspicion: len(min_suspicion) >= MIN_ONE_SUSPICION, map_suspicion))
 
@@ -111,13 +115,15 @@ def checks_of_all_lines(data_list):
 # stage 4
 def checks_suspicion_yield(generator):
     """פונקציה המקבלת שורה ועוברת ע"י yield על כולם ומחזירה את כל השורות שיש להם לפחות חשודה אחת"""
-    dict_check = dict_of_checks_suspicion()
-    return (line for line in generator if len(list_line_checks(line, dict_check)) >= MIN_ONE_SUSPICION)
+    data = list(load_csv_on_yield(generator))
+    dict_check = dict_of_checks_suspicion(data)
+    return (line for line in data if len(list_line_checks(line, dict_check)) >= MIN_ONE_SUSPICION)
 
 
 def tuple_of_suspicion_details(generator):
     """פונקציה המקבלת generator ומחזירה רשימה של טאפלים שבראשון יש רשימה של הפרטים של השורה ובשני יש את רשימה של החשודות"""
-    dict_check = dict_of_checks_suspicion()
+    data = list(load_csv_on_yield(generator))
+    dict_check = dict_of_checks_suspicion(data)
     return ((line, list_line_checks(line, dict_check)) for line in checks_suspicion_yield(generator))
 
 
@@ -134,3 +140,13 @@ def union_all_generator():
 
     count = count_of_suspicion_lines(detailed)
     print(f"Total of sus {count}")
+
+
+def add_suspicion(generator):
+    """פונקציה להוספת חשוד 'כמות פניות של IP שולח'"""""
+    ip_source = list(map(lambda ips: ips[MAP_ROWS["IP_SOURCE"]], generator)) # רשימה של כל IP של השולח
+    counter_ip_source = Counter(ip_source) # מילון של כמות ההפניות
+
+    # עוברים על כל אחד במילון בודקים האם הוא גדול מ ACCESS_FREQUENT
+    data = list(ip for ip, count in counter_ip_source.items() if count >= ACCESS_FREQUENT)
+    return data
